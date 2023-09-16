@@ -1,0 +1,45 @@
+{
+  "manifest_version": 3,
+  "name": "rubyAi",
+  "description": "Translates Any language text on webpages to Any language and displays the translation as ruby above the text.",
+  "version": "0.0.0.1",
+  "permissions": [
+    "activeTab", "tabs",
+    "storage"
+  ],
+  "host_permissions": [
+    "<all_urls>",
+    "https://*.googleapis.com/"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+        "16": "images/icon-16.png",
+        "48": "images/icon-48.png",
+        "128": "images/icon-128.png"
+    }
+  },
+  "icons": {
+    "16": "images/icon-16.png",
+    "48": "images/icon-48.png",
+    "128": "images/icon-128.png"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  },
+  "web_accessible_resources": [
+    {
+        "resources": ["styles.css"],
+        "matches": ["<all_urls>"]
+    }
+  ]
+}

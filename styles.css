@@ -9,6 +9,10 @@ body {
     align-items: center;
 }
 
+icon {
+    height: 1em;
+    vertical-align: middle;
+}
 h1 {
     color: #333;
     font-size: 24px;
@@ -30,7 +34,7 @@ button {
     font-size: 16px;
     margin: 4px 2px;
     cursor: pointer;
-    
+    width: 80%;
 }
 
 /* Options page styles */

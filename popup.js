@@ -11,6 +11,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    chrome.storage.local.get('language', function(result) {
+        if (result.language) {
+            document.getElementById('languageInput').value = result.language;
+        }
+    });
+
     // When the translate button is clicked, send a message to the background script to translate the page
     onButton.addEventListener('click', function() {
         chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
@@ -31,5 +37,10 @@ document.addEventListener('DOMContentLoaded', function() {
         let apiKey = document.getElementById('apiKey').value;
         chrome.storage.local.set({ api_key: apiKey });
         alert('API Key saved.');
+    });
+
+
+    document.getElementById('languageInput').addEventListener('input', function(e) {
+        chrome.storage.local.set({ language: e.target.value });
     });
 });

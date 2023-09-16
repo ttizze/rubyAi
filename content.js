@@ -36,6 +36,8 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         chrome.storage.local.set({isTranslating: true});
         console.log("Start translation");
         chrome.runtime.sendMessage({ "message": "on" }); 
+        let textString = getTextString();
+        sendOriginalTextStringToBackground(textString);
     } else if (request.message === "off") {
         // 翻訳を停止するためのフラグを立てます
         chrome.storage.local.set({isTranslating: false});

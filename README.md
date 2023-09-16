@@ -23,11 +23,11 @@ rubyAi is a Chrome extension that translates any language text on a web page and
 4. Click 'Load unpacked extension' and select the downloaded folder.
 
 ## Usage
-
 1. Click the extension icon to open the popup.
 2. Enter your OpenAI API key and click the 'Save API Key' button.
-3. Click the 'ON' button to start translation. The text on the page is translated and the translation is displayed as ruby.
-4. Click the 'OFF' button to stop translation.
+3. Enter the language you want to translate into in the text field (e.g., 'English', 'Japanese').
+4. Click the 'ON' button to start the translation. The text on the page will be translated and the translation will be displayed as ruby.
+5. Click the 'OFF' button to stop the translation.
 
 ## Notes
 

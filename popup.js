@@ -14,6 +14,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    chrome.storage.local.get('power', function(result) {
+        if (result.power) {
+            document.getElementById('toggle').checked = result.power;
+        }
+    });
 
     document.getElementById('saveApiKeyIcon').addEventListener('click', function() {
         let apiKey = document.getElementById('apiKey').value;
@@ -49,11 +54,13 @@ document.addEventListener('DOMContentLoaded', function() {
             chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
                 let activeTab = tabs[0];
                 chrome.tabs.sendMessage(activeTab.id, {"message": "on"});
+                chrome.storage.local.set({ power: true });
             });
         } else {
             chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
                 let activeTab = tabs[0];
                 chrome.tabs.sendMessage(activeTab.id, {"message": "off"});
+                chrome.storage.local.set({ power: false });
             });
         }
     });

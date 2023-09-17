@@ -1,21 +1,30 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <title>rubyAi</title>
     <link rel="stylesheet" type="text/css" href="styles.css">
 </head>
 <body>
     <h1><img src="/images/icon-38.png" alt="Icon" id="icon">rubyAi</h1>
-    <p>OpenAI API Key</p>
-    <input type="password" id="apiKey" name="apiKey">
-    <button id="saveApiKeyButton">Save Key</button>
-    <p>Language</p>
-    <input type="text" id="languageInput" placeholder="Enter language here">
-    <br>
-    <button id="on">ON</button>
-    <button id="off">OFF</button>
+    <div class="container">
+        <div class="settings">
+            <p>OpenAI API Key</p>
+            <div class ="apiKey">
+                <input type="password" id="apiKey" name="apiKey" class ="textInput"placeholder="Enter API Key here">
+                <img src="/images/save.png" id="saveApiKeyIcon" alt="Save Key" class="saveIcon">
+            </div>
+            <p>Language</p>
+            <div class="language">
+                <input type="text" id="languageInput" placeholder="Enter language here" class ="textInput">
+                <img src="/images/save.png" id="saveLanguageIcon" alt="Save Key" class="saveIcon">
+            </div>
+            <p>Font Size</p>
+            <input type="range" id="fontSizeSlider" min="10" max="50" value="20" placeholder= "Enter font size here" class ="slider">
+        </div>
+        <img src="/images/switch-on.png" id="on" alt="Switch" class="switchIcon">
+        <img src="/images/switch-off.png" id="off" alt="Switch" class="switchIcon">
+    </div>
     <script src="popup.js"></script>
-    <br>
     <a target="_blank" href="https://icons8.com/icon/29FFl5RUehZT/ruby-gemstone">Ruby Gemstone</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
 </body>
 </html>

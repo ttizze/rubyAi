@@ -1,13 +1,36 @@
 /* General styles */
-body {
-    width: 200px;
-    font-family: meiryo;
-    background-color: #f0f0f0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+
+/* CSSリセット */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
+
+body, h1, h2, h3, h4, h5, h6, p, ul, ol, li, dl, dt, dd, img, figure, figcaption, blockquote, form, fieldset, legend, input, textarea, button, select, option, table, th, td {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 100%;
+    font: inherit;
+    vertical-align: baseline;
+}
+
+body {
+    line-height: 1;
+}
+
+ul, ol {
+    list-style: none;
+}
+
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+
+
 
 icon {
     height: 1em;
@@ -23,50 +46,90 @@ p {
     font-size: 16px;
 }
 
-button {
-    background-color: #4CAF50; /* Green */
-    border: none;
-    color: white;
-    padding: 15px 32px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-    margin: 4px 2px;
-    cursor: pointer;
-    width: 80%;
+ruby{
+    line-height: 1.5;
 }
 
-/* Options page styles */
-#optionsForm {
-    margin-top: 20px;
+rt {
+    font-size: 10px;
 }
 
-#optionsForm label {
-    font-weight: bold;
-    display: block;
-    margin-bottom: 5px;
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 250px;
 }
 
-#optionsForm input[type="text"] {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 20px;
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+    border-radius: 8px;
+}
+
+.textInput {
+    width: 90%;
+    padding: 5px;
     border: 1px solid #ccc;
     border-radius: 4px;
-    box-sizing: border-box;
+    font-size: 16px;
+    background-color: #f5f5f5;
+    transition: border-color 0.3s ease;
 }
 
-#optionsForm input[type="submit"] {
-    background-color: #4CAF50;
-    color: white;
-    padding: 14px 20px;
-    border: none;
-    border-radius: 4px;
+.textInput:focus {
+    border-color: #8FD9F4;
+    outline: none;
+}
+
+.switchIcon {
+    width: 50x;
+    height: 50px;
+    margin-left: 10px;
     cursor: pointer;
-    float: right;
 }
 
-#optionsForm input[type="submit"]:hover {
-    background-color: #45a049;
+.slider{
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    background-color: #f5f5f5;
+    transition: border-color 0.3s ease;
+}
+
+.settings > *{
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.apiKey{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.language{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.saveIcon{
+    width: 20px;
+    height: 20px;
+    margin-left: 5px;
 }

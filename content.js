@@ -121,6 +121,6 @@ function createRubyElement(originalText, translatedText) {
     rt.textContent = translatedText;
     ruby.appendChild(rb);
     ruby.appendChild(rt);
-    ruby.style.lineHeight = '1.5';
+    rt.style.fontSize = '16px';
     return ruby;
 }

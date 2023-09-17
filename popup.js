@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    document.getElementById('saveApiKeyButton').addEventListener('click', function() {
+    document.getElementById('saveApiKeyIcon').addEventListener('click', function() {
         let apiKey = document.getElementById('apiKey').value;
         chrome.storage.local.set({ api_key: apiKey });
         alert('API Key saved.');
@@ -42,5 +42,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.getElementById('languageInput').addEventListener('input', function(e) {
         chrome.storage.local.set({ language: e.target.value });
+    });
+
+    document.getElementById('fontSizeSlider').addEventListener('input', function(e) {
+        const fontSize = e.target.value;
+        console.log(fontSize);
+        // ここでルビのフォントサイズを変更します
+        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+            let activeTab = tabs[0];
+            chrome.scripting.executeScript({
+                target: {tabId: activeTab.id},
+                function: function(fontSize) {
+                    document.querySelectorAll('rt').forEach((rt) => { 
+                        rt.style.fontSize = fontSize + 'px'; 
+                    });
+                },
+                args: [fontSize]
+            });
+        });
     });
 });

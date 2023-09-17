@@ -1,13 +1,10 @@
 // popup.js
 document.addEventListener('DOMContentLoaded', function() {
-    let onButton = document.getElementById('on');
-    let offButton = document.getElementById('off');
-    let apiKeyInput = document.getElementById('apiKey');
 
     // When the page is loaded, display the saved API key in the input field
     chrome.storage.local.get('api_key', function(result) {
         if (result.api_key) {
-            apiKeyInput.value = result.api_key;
+            document.getElementById('apiKey').value = result.api_key;
         }
     });
 
@@ -17,21 +14,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // When the translate button is clicked, send a message to the background script to translate the page
-    onButton.addEventListener('click', function() {
-        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-            let activeTab = tabs[0];
-            chrome.tabs.sendMessage(activeTab.id, {"message": "on"});
-        });
-    });
-
-    // When the stop translation button is clicked, send a message to the background script to stop translation
-    offButton.addEventListener('click', function() {
-        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-            let activeTab = tabs[0];
-            chrome.tabs.sendMessage(activeTab.id, {"message": "off"});
-        });
-    });
 
     document.getElementById('saveApiKeyIcon').addEventListener('click', function() {
         let apiKey = document.getElementById('apiKey').value;
@@ -60,5 +42,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 args: [fontSize]
             });
         });
+    });
+
+    document.getElementById('toggle').addEventListener('change', function() {
+        if (this.checked) {
+            chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+                let activeTab = tabs[0];
+                chrome.tabs.sendMessage(activeTab.id, {"message": "on"});
+            });
+        } else {
+            chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+                let activeTab = tabs[0];
+                chrome.tabs.sendMessage(activeTab.id, {"message": "off"});
+            });
+        }
     });
 });

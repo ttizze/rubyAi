@@ -1,11 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>rubyAi</title>
+    <title>RubyAI</title>
     <link rel="stylesheet" type="text/css" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&family=Russo+One&display=swap" rel="stylesheet">
 </head>
 <body>
-    <h1><img src="/images/icon-38.png" alt="Icon" id="icon">rubyAi</h1>
+    <div class="banner">
+        <img src="/images/icon-38.png" alt="Icon" id="icon">
+        <h1>RubyAI</h1>
+    </div>
     <div class="container">
         <div class="settings">
             <p>OpenAI API Key</p>
@@ -21,8 +27,10 @@
             <p>Font Size</p>
             <input type="range" id="fontSizeSlider" min="10" max="50" value="20" placeholder= "Enter font size here" class ="slider">
         </div>
-        <img src="/images/switch-on.png" id="on" alt="Switch" class="switchIcon">
-        <img src="/images/switch-off.png" id="off" alt="Switch" class="switchIcon">
+        <div class="toggle_button">
+            <input id="toggle" class="toggle_input" type='checkbox' />
+            <label for="toggle" class="toggle_label"/>
+        </div>
     </div>
     <script src="popup.js"></script>
     <a target="_blank" href="https://icons8.com/icon/29FFl5RUehZT/ruby-gemstone">Ruby Gemstone</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>

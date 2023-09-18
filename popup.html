@@ -3,9 +3,10 @@
 <head>
     <title>RubyAI</title>
     <link rel="stylesheet" type="text/css" href="popup.css">
+    <link rel="stylesheet" href="https://use.typekit.net/pom2pvg.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto&family=Russo+One&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="banner">
@@ -16,13 +17,13 @@
         <div class="settings">
             <p>OpenAI API Key</p>
             <div class ="apiKey">
-                <input type="password" id="apiKey" name="apiKey" class ="textInput"placeholder="Enter API Key here">
-                <img src="/images/save.png" id="saveApiKeyIcon" alt="Save Key" class="saveIcon">
+                <input type="password" id="apiKeyInput" class ="textInput"placeholder="Enter API Key here">
+                <img src="/images/send.png" id="saveApiKeyIcon" alt="Save Key" class="saveIcon">
             </div>
             <p>Language</p>
             <div class="language">
                 <input type="text" id="languageInput" placeholder="Enter language here" class ="textInput">
-                <img src="/images/save.png" id="saveLanguageIcon" alt="Save Key" class="saveIcon">
+                <img src="/images/send.png" id="saveLanguageIcon" alt="Save Key" class="saveIcon">
             </div>
             <p>Font Size</p>
             <input type="range" id="fontSizeSlider" min="10" max="50" value="20" placeholder= "Enter font size here" class ="slider">
@@ -33,8 +34,5 @@
         </div>
     </div>
     <script src="popup.js"></script>
-    <div class="iconAd">
-        <a target="_blank" href="https://icons8.com/icon/29FFl5RUehZT/ruby-gemstone">Ruby Gemstone</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
-    </div>
 </body>
 </html>

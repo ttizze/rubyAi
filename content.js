@@ -66,7 +66,11 @@ function getTextNodes(node) {
             textNodes = textNodes.concat(getTextNodes(child));
         }
     }
-    return textNodes.filter(textNode => /[^\s\u200B-\u200D\uFEFF]/.test(textNode.nodeValue));
+    return textNodes.filter(textNode => {
+        let text = textNode.nodeValue.trim();
+        // テキストが一文字だけまたは数字だけでないことを確認
+        return text.length > 1 && !/^\d+$/.test(text);
+    });
 }
 function isElementVisible(el) {
     while (el && el.nodeType === Node.ELEMENT_NODE) {

@@ -20,7 +20,6 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo) {
 chrome.runtime.onMessage.addListener(
     async function (request, sender, sendResponse) {
         if (request.message === "original_text_string") {
-            console.log("original_text_string" + request.textString);
             let response = await sendTranslationToContent(request.textString, sender);
             sendResponse(response);
         } else if (request.message === "on") {
@@ -81,7 +80,7 @@ async function translate(text) {
                         body: JSON.stringify({
                             "model": "gpt-3.5-turbo-0613",
                             "messages": [
-                                { "role": "system", "content": `You are a translation AI. Paragraphs, sentences, words, and uuid tags will be sent to you. Translate the paragraphs, sentences, and words into ${language} and output them, and output the uuid tags as they are. Do not change the order of sentences within a paragraph unless absolutely necessary. Do not output any additional punctuation such as periods or commas. The alignment of uuid tags is critical and must not be disrupted under any circumstances. Misalignment of uuid tags will cause serious problems. Never exceed the boundaries of the uuid tags. Deep Breath. Let's do our best!` },
+                                { "role": "system", "content": `You are a translation AI. Paragraphs, sentences, words, and uuid tags will be sent to you. Translate the paragraphs, sentences, and words into ${language} and output them, and output the uuid tags as they are. Do not change the order of sentences within a paragraph unless absolutely necessary.Do not output any additional punctuation such as periods, commas, or punctuation marks that do not exist in the original text. The alignment of uuid tags is critical and must not be disrupted under any circumstances. Misalignment of uuid tags will cause serious problems. Never exceed the boundaries of the uuid tags. Deep Breath. Let's do our best!` },
                                 { "role": "user", "content": text }
                             ],
                             "temperature": 0.7,

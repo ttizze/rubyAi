@@ -1,4 +1,3 @@
-// ページの読み込みを待つ
 let textNodes, nodeUuidMap, textString;
 let isTranslating;
 
@@ -21,7 +20,7 @@ window.addEventListener('load', function() {
 });
 
 // メッセージリスナーを設定
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+chrome.runtime.onMessage.addListener(async function(request, sender, sendResponse) {
     // URLが変更されたとき翻訳を行う
     if (request.message === "url_changed") {
         if (isTranslating) {
@@ -29,8 +28,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
             sendOriginalTextStringToBackground(textString);
         }
     }else if(request.message === "translation_result" ){
-        console.log("translation_result" + request.translation);
-        applyTranslation(request.translation);
+        applyTranslation(request.translation).catch(console.error);
     }else if (request.message === "on") {
         // 翻訳を開始するためのフラグを立てます
         chrome.storage.local.set({isTranslating: true});
@@ -55,16 +53,43 @@ function getTextString() {
 
 function getTextNodes(node) {
     let textNodes = [];
-    if (node.nodeType === Node.TEXT_NODE) {
-        textNodes.push(node);
-    } else if (node.nodeType === Node.ELEMENT_NODE && node.tagName !== 'SCRIPT' && node.tagName !== 'STYLE') {
+    if (node.nodeType === Node.TEXT_NODE && /\S/.test(node.nodeValue) && isElementVisible(node.parentNode)) {
+        if (isElementInViewport(node.parentNode)  && isElementVisible(node.parentNode)) {
+            console.log(node);
+            console.log(node.parentNode);
+            textNodes.unshift(node);
+        }else{
+            textNodes.push(node);
+        }
+    } else if (node.nodeType === Node.ELEMENT_NODE && node.tagName.toLowerCase() !== 'script' && node.tagName.toLowerCase() !== 'style') {
         for (let child of node.childNodes) {
             textNodes = textNodes.concat(getTextNodes(child));
         }
     }
     return textNodes.filter(textNode => /[^\s\u200B-\u200D\uFEFF]/.test(textNode.nodeValue));
 }
+function isElementVisible(el) {
+    while (el && el.nodeType === Node.ELEMENT_NODE) {
+        let style = window.getComputedStyle(el);
+        if (style.display === 'none' || style.visibility === 'hidden') {
+            return false;
+        }
+        el = el.parentNode;
+    }
+    return true;
+}
 
+
+function isElementInViewport(el) {
+    var rect = el.getBoundingClientRect();
+
+    return (
+        rect.top >= 0 &&
+        rect.left >= 0 &&
+        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+        rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+    );
+}
 // テキストノードとUUIDのマッピングを作成する関数
 function createNodeUuidMap(textNodes) {
     let nodeUuidMap = new Map();
@@ -91,15 +116,15 @@ function sendOriginalTextStringToBackground(textString) {
 }
 
 // 翻訳結果を適用する関数
-function applyTranslation(translationAndUUID) {
+async function applyTranslation(translationAndUUID) {
     let translations = translationAndUUID.split(/(UUID\d+)/).filter(str => str !== "");
 
     let uuid = translations[1];
     let translation = translations[0];
     let textNode = [...nodeUuidMap].find(([node, id]) => id === uuid)[0];
     if (textNode) {
-        let originalParts = textNode.nodeValue.split(/(?<=[。.])/);
-        let translatedParts = translation.split(/(?<=[。.])/);
+        let originalParts = textNode.nodeValue.split(/(?<=\.\s|$|。)/);
+        let translatedParts = translation.split(/(?<=\.\s|$|。)/);
         let span = document.createElement('span'); // 新しい親要素を作成する
         for (let j = 0; j < originalParts.length; j++) {
             if (j < translatedParts.length) {

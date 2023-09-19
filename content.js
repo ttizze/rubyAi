@@ -1,48 +1,5 @@
 let textNodes, nodeUuidMap, textString;
-let isTranslating;
 
-chrome.storage.local.get('isTranslating', function(data) {
-    if (data.isTranslating === undefined) {
-        chrome.storage.local.set({isTranslating: false});
-        isTranslating = false;
-        console.log("isTranslateset" + isTranslating);
-    } else {
-        isTranslating = data.isTranslating;
-        console.log("isTranslate" + isTranslating);
-    }
-});
-
-window.addEventListener('load', function() {
-    if (isTranslating) {
-        let textString = getTextString();
-        sendOriginalTextStringToBackground(textString);
-    }
-});
-
-// メッセージリスナーを設定
-chrome.runtime.onMessage.addListener(async function(request, sender, sendResponse) {
-    // URLが変更されたとき翻訳を行う
-    if (request.message === "url_changed") {
-        if (isTranslating) {
-            let textString = getTextString();
-            sendOriginalTextStringToBackground(textString);
-        }
-    }else if(request.message === "translation_result" ){
-        applyTranslation(request.translation).catch(console.error);
-    }else if (request.message === "on") {
-        // 翻訳を開始するためのフラグを立てます
-        chrome.storage.local.set({isTranslating: true});
-        console.log("Start translation");
-        chrome.runtime.sendMessage({ "message": "on" }); 
-        let textString = getTextString();
-        sendOriginalTextStringToBackground(textString);
-    } else if (request.message === "off") {
-        // 翻訳を停止するためのフラグを立てます
-        chrome.storage.local.set({isTranslating: false});
-        console.log("Stop translation");
-        chrome.runtime.sendMessage({ "message": "off" });
-    }
-});
 // 翻訳データを更新する関数
 function getTextString() {
     textNodes = getTextNodes(document.body);
@@ -50,6 +7,32 @@ function getTextString() {
     textString = createTextString(textNodes, nodeUuidMap);
     return textString;
 }
+
+// テキストノードとUUIDのマッピングを作成する関数
+function createNodeUuidMap(textNodes) {
+    let nodeUuidMap = new Map();
+    for (let i = 0; i < textNodes.length; i++) {
+        let uuid = 'UUID' + i;
+        nodeUuidMap.set(textNodes[i], uuid);
+    }
+    return nodeUuidMap;
+}
+
+// テキストノードの内容とUUIDを結合したテキストを作成する関数
+function createTextString(textNodes, nodeUuidMap) {
+    let textString = '';
+    for (let i = 0; i < textNodes.length; i++) {
+        let uuid = nodeUuidMap.get(textNodes[i]);
+        textString += textNodes[i].nodeValue + ' ' + uuid + ' ';
+    }
+    return textString.trim(); // 余分なスペースを削除
+}
+
+// テキストノードを翻訳する関数
+function sendOriginalTextStringToBackground(textString) {
+    chrome.runtime.sendMessage({ "message": "original_text_string", "textString": textString });
+}
+
 
 function getTextNodes(node) {
     let textNodes = [];
@@ -94,30 +77,6 @@ function isElementInViewport(el) {
         rect.right <= (window.innerWidth || document.documentElement.clientWidth)
     );
 }
-// テキストノードとUUIDのマッピングを作成する関数
-function createNodeUuidMap(textNodes) {
-    let nodeUuidMap = new Map();
-    for (let i = 0; i < textNodes.length; i++) {
-        let uuid = 'UUID' + i;
-        nodeUuidMap.set(textNodes[i], uuid);
-    }
-    return nodeUuidMap;
-}
-
-// テキストノードの内容とUUIDを結合したテキストを作成する関数
-function createTextString(textNodes, nodeUuidMap) {
-    let textString = '';
-    for (let i = 0; i < textNodes.length; i++) {
-        let uuid = nodeUuidMap.get(textNodes[i]);
-        textString += textNodes[i].nodeValue + ' ' + uuid + ' ';
-    }
-    return textString.trim(); // 余分なスペースを削除
-}
-
-// テキストノードを翻訳する関数
-function sendOriginalTextStringToBackground(textString) {
-    chrome.runtime.sendMessage({ "message": "original_text_string", "textString": textString });
-}
 
 // 翻訳結果を適用する関数
 async function applyTranslation(translationAndUUID) {
@@ -153,3 +112,35 @@ function createRubyElement(originalText, translatedText) {
     rt.style.fontSize = '16px';
     return ruby;
 }
+
+
+window.addEventListener('load', function() {
+    chrome.storage.local.get('power', function(data) {
+        if (data.power === undefined) {
+            chrome.storage.local.set({power: false});
+        } else if (data.power) {
+            let textString = getTextString();
+            sendOriginalTextStringToBackground(textString);
+        }
+    });
+});
+
+// メッセージリスナーを設定
+chrome.runtime.onMessage.addListener(async function(request, sender, sendResponse) {
+    // URLが変更されたとき翻訳を行う
+    if (request.message === "url_changed") {
+        if (power) {
+            let textString = getTextString();
+            sendOriginalTextStringToBackground(textString);
+        }
+    }else if(request.message === "translation_result" ){
+        applyTranslation(request.translation).catch(console.error);
+    }else if (request.message === "on") {
+        chrome.runtime.sendMessage({ "message": "on" }); 
+        let textString = getTextString();
+        sendOriginalTextStringToBackground(textString);
+    } else if (request.message === "off") {
+        // 翻訳を停止するためのフラグを立てます
+        chrome.runtime.sendMessage({ "message": "off" });
+    }
+});

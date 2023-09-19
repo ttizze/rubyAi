@@ -1,22 +1,16 @@
 chrome.runtime.onInstalled.addListener(() => {
-    chrome.storage.local.get('isTranslating', function(result) {
-        if (result.isTranslating === true) {
-            chrome.action.setBadgeText({
-                text: "ON",
-                });
-        }else{
-            chrome.action.setBadgeText({
-                text: "OFF",
-                });
-        }
+    chrome.storage.local.get('power', function(result) {
+        setBadgeText(result.power ? "ON" : "OFF");
     });
 });
+
 chrome.tabs.onUpdated.addListener(function (tabId, changeInfo) {
     if (changeInfo.status === 'complete' && changeInfo.url) {
         chrome.tabs.sendMessage(tabId, { "message": "url_changed" });
     }
 });
-// Listen for messages from the content scriptmessages from the content script
+
+// メッセージリスナーを設定
 chrome.runtime.onMessage.addListener(
     async function (request, sender, sendResponse) {
         if (request.message === "original_text_string") {
@@ -31,10 +25,22 @@ chrome.runtime.onMessage.addListener(
     }
 );
 
+function setBadgeText(text) {
+    chrome.action.setBadgeText({text: text});
+}
 
 // Function to call the translation API
 async function sendTranslationToContent(textString, sender) {
-    // textStringが3000文字超えたらuuid＋数字で分割する
+    const textLists = splitTextString(textString);
+
+    for (let text of textLists) {
+        const response = await translate(text);
+        await processResponse(response, sender.tab.id);
+    }
+}
+
+
+function splitTextString(textString) {
     const textLists = [];
     if (textString.length > 3000) {
         let start = 0;
@@ -54,13 +60,8 @@ async function sendTranslationToContent(textString, sender) {
     } else {
         textLists.push(textString);
     }
-
-    for (let text of textLists) {
-            const response = await translate(text);
-            await processResponse(response, sender.tab.id);
-    }
+    return textLists;
 }
-
 
 // Function to call the translation API
 async function translate(text) {
@@ -71,6 +72,7 @@ async function translate(text) {
                 if (result.api_key) {
                     const apiKey = result.api_key;
                     const language = result.language || 'japanese';
+                    console.log('language: ' + language)
                     const response = await fetch(url, {
                         method: 'POST',
                         headers: {
@@ -129,7 +131,6 @@ async function processResponse(response, tabId) {
         }
     }
 }
-
 
 async function sendToContent(tabId, translation) {
     chrome.tabs.sendMessage(tabId, { message: "translation_result", translation: translation });

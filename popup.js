@@ -1,53 +1,57 @@
 // popup.js
 document.addEventListener('DOMContentLoaded', function() {
 
-    // When the page is loaded, display the saved API key in the input field
-    chrome.storage.local.get('api_key', function(result) {
-        if (result.api_key) {
-            document.getElementById('apiKeyInput').value = result.api_key;
-            document.getElementById('saveApiKeyIcon').src = '/images/checked.png';
-        } else {
-            document.getElementById('saveApiKeyIcon').src = '/images/send.png';
-        }
-    });
-
-
-    chrome.storage.local.get('language', function(result) {
-        if (result.language) {
-            document.getElementById('languageInput').value = result.language;
-            document.getElementById('saveLanguageIcon').src = '/images/checked.png';
-        } else {
-            document.getElementById('saveLanguageIcon').src = '/images/send.png';
-        }
-    });
-
-    chrome.storage.local.get('power', function(result) {
-        if (result.power) {
-            document.getElementById('toggle').checked = result.power;
-        }
-    });
-
-
-    document.getElementById('saveApiKeyIcon').addEventListener('click', function() {
-        chrome.storage.local.set({ api_key: document.getElementById('apiKeyInput').value});
-    });
-
-    document.getElementById('apiKeyInput').oninput = function() {
-        document.getElementById('saveApiKeyIcon').src = '/images/send.png';
+    //storageから値を取得して表示する
+    function getStorageItem(item, inputId, iconId) {
+        chrome.storage.local.get(item, function(result) {
+            if (result[item]) {
+                document.getElementById(inputId).value = result[item];
+                if (iconId) {
+                    document.getElementById(iconId).src = '/images/checked.png';
+                }
+            } else {
+                if (iconId) {
+                    document.getElementById(iconId).src = '/images/send.png';
+                }
+            }
+        });
     }
 
-    document.getElementById('languageInput').oninput = function() {
-        document.getElementById('saveLanguageIcon').src = '/images/send.png';
+    function setInputListener(inputId, iconId) {
+        document.getElementById(inputId).oninput = function() {
+            document.getElementById(iconId).src = '/images/send.png';
+        }
     }
 
+    function setIconClickListener(iconId, item, inputId) {
+        document.getElementById(iconId).addEventListener('click', function() {
+            if (inputId.value !== '') {
+                chrome.storage.local.set({ [item]: document.getElementById(inputId).value});
+                this.classList.add('animate');
+                this.addEventListener('animationend', function() {
+                    this.classList.remove('animate');
+                    this.src = '/images/checked.png';
+                }, {once: true}); // イベントリスナーは一度だけ実行されます
+            } else {
+                alert('Please enter a value.');
+            }
+        });
+    }
 
-    document.getElementById('saveLanguageIcon').addEventListener('click', function() {
-        chrome.storage.local.set({ language: document.getElementById('languageInput').value});
-    });
+    getStorageItem('api_key', 'apiKeyInput', 'saveApiKeyIcon');
+    setInputListener('apiKeyInput', 'saveApiKeyIcon');
+    setIconClickListener('saveApiKeyIcon', 'api_key', 'apiKeyInput');
 
+    getStorageItem('language', 'languageInput', 'saveLanguageIcon');
+    setInputListener('languageInput', 'saveLanguageIcon');
+    setIconClickListener('saveLanguageIcon', 'language', 'languageInput');
+
+    getStorageItem('power', 'toggle');
+
+
+    // ここでルビのフォントサイズを変更します
     document.getElementById('fontSizeSlider').addEventListener('input', function(e) {
         const fontSize = e.target.value;
-        // ここでルビのフォントサイズを変更します
         chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
             let activeTab = tabs[0];
             chrome.scripting.executeScript({
@@ -78,14 +82,4 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    let saveIcons = document.getElementsByClassName('saveIcon');
-    for (let i = 0; i < saveIcons.length; i++) {
-        saveIcons[i].addEventListener('click', function() {
-            this.classList.add('animate');
-            this.addEventListener('animationend', function() {
-                this.classList.remove('animate');
-                this.src = '/images/checked.png';
-            }, {once: true}); // イベントリスナーは一度だけ実行されます
-        });
-    }
 });

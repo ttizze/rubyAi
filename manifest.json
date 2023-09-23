@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "rubyAi",
+  "name": "RubyAI",
   "description": "Translates Any language text on webpages to Any language and displays the translation as ruby above the text.",
   "version": "0.0.0.1",
   "permissions": [

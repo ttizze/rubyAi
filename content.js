@@ -1,60 +1,148 @@
-let textNodes, nodeUuidMap, textString;
+let elements, textList;
 
-// 翻訳データを更新する関数
-function getTextString() {
-    textNodes = getTextNodes(document.body);
-    nodeUuidMap = createNodeUuidMap(textNodes);
-    textString = createTextString(textNodes, nodeUuidMap);
-    return textString;
-}
+//要素を再帰的に取得し、翻訳対象であれば配列に格納する
+//バックグラウンドからオリジナルをkey、翻訳結果をvalueにもつmapを受け取る
 
-// テキストノードとUUIDのマッピングを作成する関数
-function createNodeUuidMap(textNodes) {
-    let nodeUuidMap = new Map();
-    for (let i = 0; i < textNodes.length; i++) {
-        let uuid = 'UUID' + i;
-        nodeUuidMap.set(textNodes[i], uuid);
+// 翻訳対象のテキストを取得する関数
+function getTextList() {
+    elements = getElements(document.body);
+    appendUUID(elements);
+    let textList = [];
+    for (let i = 0; i < elements.length; i++) {
+        let text = elements[i].innerText;
+        console.log(text);
+        textList.push(text);
     }
-    return nodeUuidMap;
+    return textList;
 }
 
-// テキストノードの内容とUUIDを結合したテキストを作成する関数
-function createTextString(textNodes, nodeUuidMap) {
-    let textString = '';
-    for (let i = 0; i < textNodes.length; i++) {
-        let uuid = nodeUuidMap.get(textNodes[i]);
-        textString += textNodes[i].nodeValue + ' ' + uuid + ' ';
+
+// 要素にUUIDを付与する関数
+function appendUUID(elements) {
+    for (let i = 0; i < elements.length; i++) {
+        let uuid = "UUID" + i;
+        elements[i].setAttribute("uuid", uuid);
     }
-    return textString.trim(); // 余分なスペースを削除
-}
-
-// テキストノードを翻訳する関数
-function sendOriginalTextStringToBackground(textString) {
-    chrome.runtime.sendMessage({ "message": "original_text_string", "textString": textString });
 }
 
 
-function getTextNodes(node) {
-    let textNodes = [];
-    if (node.nodeType === Node.TEXT_NODE && /\S/.test(node.nodeValue) && isElementVisible(node.parentNode)) {
-        if (isElementInViewport(node.parentNode)  && isElementVisible(node.parentNode)) {
-            console.log(node);
-            console.log(node.parentNode);
-            textNodes.unshift(node);
-        }else{
-            textNodes.push(node);
-        }
-    } else if (node.nodeType === Node.ELEMENT_NODE && node.tagName.toLowerCase() !== 'script' && node.tagName.toLowerCase() !== 'style') {
-        for (let child of node.childNodes) {
-            textNodes = textNodes.concat(getTextNodes(child));
+// テキストを翻訳する関数
+function sendOriginalTextListToBackground(textList) {
+    chrome.runtime.sendMessage({ "message": "original_text_list", "textList": textList });
+}
+
+//要素を再帰的に取得し、翻訳対象であれば配列に格納する
+function getElements(element) {
+    let elements = [];
+    if (element.nodeType !== Node.TEXT_NODE && element.nodeType !== Node.COMMENT_NODE ) {
+        if (shouldBeTranslated(element)) {
+            if (isElementInViewport(element)  && isElementVisible(element)) {
+                elements.unshift(element);
+            }else{
+                elements.push(element);
+            }
         }
     }
-    return textNodes.filter(textNode => {
-        let text = textNode.nodeValue.trim();
-        // テキストが一文字だけまたは数字だけでないことを確認
-        return text.length > 1 && !/^\d+$/.test(text);
-    });
+    if (element.nodeType === Node.ELEMENT_NODE) {
+        for (let child of element.childNodes) {
+            elements = elements.concat(getElements(child));
+        }
+    }
+    return elements
 }
+
+function getElements(node) {
+    let elements = [];
+    if (node.nodeName !== "#text" && node.nodeName !== "#comment" && !isNotTranslatable(node)) {
+        if (shouldProcessNode(node)) {
+            if (isNodeInViewport(node, .3) && !isNodeIgnored(node)) {
+                elements.unshift(node);
+            }else{
+                elements.push(node);
+            }
+        } else {
+            for (let i = 0; i < node.childNodes.length; ++i) {
+                processNode(node.childNodes[i]);
+            }
+        }
+    }
+}
+function shouldProcessNode(node) {
+    if (node.nodeName === "#text" || node.nodeName === "#comment") return false;
+    if (node.isContentEditable) return false;
+    for (let i = 0; i < node.childNodes.length; ++i) {
+        let childNode = node.childNodes[i];
+        if (childNode.nodeName === "#text" && childNode.wholeText.trim() !== "" || childNode.nodeName === "font") return true;
+    }
+    for (let i = 0; i < node.childNodes.length; ++i) {
+        let childNode = node.childNodes[i];
+        if (childNode.nodeName !== "#text" && childNode.nodeName !== "#comment" ) return false;
+    }
+    return node.innerText !== undefined && node.innerText.trim() !== "";
+}
+
+function isNotTranslatable(element) {
+    return element.getAttribute("translate") === "no" || (element.className && element.className.split(" ").includes("notranslate"));
+}
+
+// 要素がビューポート内にあるかどうかを判断する関数
+function isNodeInViewport(node, offset = 0) {
+    const rect = node.getBoundingClientRect();
+    const windowHeight = window.innerHeight || document.documentElement.clientHeight;
+    const windowWidth = window.innerWidth || document.documentElement.clientWidth;
+
+    return !(rect.bottom < 0 - windowHeight * offset || 
+             rect.right < 0 - windowWidth * offset || 
+             rect.top > windowHeight * (1 + offset) || 
+             rect.left > windowWidth * (1 + offset));
+}
+
+function Ba(t, n = true) {
+    if ("#text" == t.nodeName || "#comment" == t.nodeName) return false;
+    if (!$a(t, e.websiteData.hostname)) return false;
+    if (t.isContentEditable && n) return false;
+    if (function (e) {
+            switch (e.tagName.toLowerCase()) {
+                case "input":
+                    return "submit" !== e.getAttribute("type");
+                case "textarea":
+                    return true;
+                default:
+                    return false
+            }
+        }(t)) return false;
+    if (jn(t)) return false;
+    for (var o = 0; o < t.childNodes.length; ++o) {
+        if ("#text" == (i = t.childNodes[o]).nodeName && "" != i.wholeText.trim() || "font" == i.nodeName) return true
+    }
+    for (o = 0; o < t.childNodes.length; ++o) {
+        var i;
+        if ("#text" != (i = t.childNodes[o]).nodeName && "#comment" != i.nodeName && (!qn(i) || jn(i) || "inline" != window.getComputedStyle(i).display || Hn(t))) return false
+    }
+    return undefined !== t.innerText && "" != t.innerText.trim()
+}
+
+function shouldBeTranslated(element) {
+    if (element.tagName.toLowerCase() === "input" || element.tagName.toLowerCase() === "textarea" || element.tagName.toLowerCase() === "script" || element.tagName.toLowerCase() === "style") {
+        return false;
+    }
+    for (let i = 0; i < element.childNodes.length; i++) {
+        let child = element.childNodes[i];
+        if (child.nodeType === Node.TEXT_NODE) {
+            let text = child.nodeValue.trim();
+            // テキストが数字だけでないことを確認
+            if (!/^\d+$/.test(text)) {
+                return true;
+            }
+        }
+    }
+    if (element.innerText && element.innerText.trim() !== "") {
+        return true;
+    }
+    return false; // ここを追加
+}
+
+
 function isElementVisible(el) {
     while (el && el.nodeType === Node.ELEMENT_NODE) {
         let style = window.getComputedStyle(el);
@@ -115,12 +203,14 @@ function createRubyElement(originalText, translatedText) {
 
 
 window.addEventListener('load', function() {
+    elements = null;
+    textList = null;
     chrome.storage.local.get('power', function(data) {
         if (data.power === undefined) {
             chrome.storage.local.set({power: false});
         } else if (data.power) {
-            let textString = getTextString();
-            sendOriginalTextStringToBackground(textString);
+            let textList = getTextList();
+            sendOriginalTextListToBackground(textList);
         }
     });
 });
@@ -130,15 +220,15 @@ chrome.runtime.onMessage.addListener(async function(request, sender, sendRespons
     // URLが変更されたとき翻訳を行う
     if (request.message === "url_changed") {
         if (power) {
-            let textString = getTextString();
-            sendOriginalTextStringToBackground(textString);
+            let textList= getTextList();
+            sendOriginalTextListToBackground(textList);
         }
     }else if(request.message === "translation_result" ){
         applyTranslation(request.translation).catch(console.error);
     }else if (request.message === "on") {
         chrome.runtime.sendMessage({ "message": "on" }); 
-        let textString = getTextString();
-        sendOriginalTextStringToBackground(textString);
+        let textList = getTextList();
+        sendOriginalTextListToBackground(textList);
     } else if (request.message === "off") {
         // 翻訳を停止するためのフラグを立てます
         chrome.runtime.sendMessage({ "message": "off" });

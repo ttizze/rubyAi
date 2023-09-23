@@ -25,8 +25,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function setIconClickListener(iconId, item, inputId) {
         document.getElementById(iconId).addEventListener('click', function() {
-            if (inputId.value !== '') {
-                chrome.storage.local.set({ [item]: document.getElementById(inputId).value});
+            var inputElement = document.getElementById(inputId);
+            if (inputElement.value && inputElement.value !== '') {
+                chrome.storage.local.set({ [item]: inputElement.value});
                 this.classList.add('animate');
                 this.addEventListener('animationend', function() {
                     this.classList.remove('animate');
@@ -46,7 +47,13 @@ document.addEventListener('DOMContentLoaded', function() {
     setInputListener('languageInput', 'saveLanguageIcon');
     setIconClickListener('saveLanguageIcon', 'language', 'languageInput');
 
-    getStorageItem('power', 'toggle');
+    chrome.storage.local.get('power', function(result) {
+        if (result.power) {
+            document.getElementById('toggle').checked = true;
+        }else{
+            document.getElementById('toggle').checked = false;
+        }
+    });
 
 
     // ここでルビのフォントサイズを変更します

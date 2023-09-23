@@ -71,6 +71,7 @@ async function translate(text) {
             chrome.storage.local.get(['api_key', 'language'], async function(result) {
                 if (result.api_key) {
                     const apiKey = result.api_key;
+                    //TODO chrome.i18n.getUILanguageでデフォルト取得したい
                     const language = result.language || 'japanese';
                     console.log('language: ' + language)
                     const response = await fetch(url, {
